@@ -11,7 +11,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 app.use(cors());
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.uhmti.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
@@ -39,6 +39,31 @@ async function run() {
       await client.connect();
       const partsCollection = client.db("manufactureable_parts").collection('allparts');
       const userCollection = client.db("manufactureable_parts").collection('allUsers');
+      const purchaseCollection = client.db("manufactureable_parts").collection('purchases');
+
+        /* get the user is =! admin */
+        app.get('/admin/:email', async(req,res)=>{
+            const email = req.params.email;
+            const user = await userCollection.findOne({email:email});
+            const isAdmin = user.role ==='admin';
+            res.send({admin: isAdmin})
+        })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       /* put Method When user login */
       app.put('/user/:email', async(req,res)=>{
           const email = req.params.email;
@@ -68,6 +93,24 @@ async function run() {
           const parts = await partsCollection.find().toArray();
           res.send(parts);
       })
+      /* get single parts by id */
+      app.get('/part/:id', async(req, res)=>{
+          const id = req.params.id;
+          const query = {_id: ObjectId(id)};
+          const booking = await partsCollection.findOne(query);
+          res.send(booking);
+      })
+
+      /* purchease a booking or post a booking */
+      app.post('/purchase', async(req,res)=>{
+          const purchase = req.body;
+        //   const query = {email: purchase.email};
+        //   const exist = await booking
+        const result = await purchaseCollection.insertOne(purchase);
+        console.log(result)
+        return res.send({success: true, result });
+      })
+
 
 
 
