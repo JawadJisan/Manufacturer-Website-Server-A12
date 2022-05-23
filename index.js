@@ -57,19 +57,20 @@ async function run() {
     });
 
     /*  */
-    app.patch('purchase/:id', async (req, res) => {
+    app.patch('/purchase/:id', async(req,res)=>{
       const id = req.params.id;
       const payment = req.body;
-      const filter = { _id: ObjectId(id) };
+      const filter = {_id: ObjectId(id)};
       const updateDoc = {
         $set: {
           paid: true,
           transactionId: payment.transactionId,
         }
       }
-      const updatePurchase = await purchaseCollection.updateOne(filter, updateDoc);
+      const updateBooking = await purchaseCollection.updateOne(filter, updateDoc);
       const result = await paymentCollection.insertOne(payment);
-      res.send(updatePurchase)
+      res.status(401).send({updateBooking, result})
+      
     })
 
 
