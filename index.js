@@ -40,10 +40,11 @@ async function run() {
     const partsCollection = client.db("manufactureable_parts").collection('allparts');
     const userCollection = client.db("manufactureable_parts").collection('allUsers');
     const purchaseCollection = client.db("manufactureable_parts").collection('purchases');
+    const paymentCollection = client.db("manufactureable_parts").collection('payments');
 
 
     /* Stripe Payment Intent */
-    app.post('create-payment-intent', verifyJWT, async(req,res)=>{
+    app.post('/create-payment-intent', verifyJWT, async(req, res) =>{
       const service = req.body;
       const price = service.price;
       const amount = price*100;
@@ -53,8 +54,23 @@ async function run() {
         payment_method_types:['card']
       });
       res.send({clientSecret: paymentIntent.client_secret})
-    })
+    });
 
+    /*  */
+    app.patch('purchase/:id', async (req, res) => {
+      const id = req.params.id;
+      const payment = req.body;
+      const filter = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          paid: true,
+          transactionId: payment.transactionId,
+        }
+      }
+      const updatePurchase = await purchaseCollection.updateOne(filter, updateDoc);
+      const result = await paymentCollection.insertOne(payment);
+      res.send(updatePurchase)
+    })
 
 
 
@@ -70,22 +86,22 @@ async function run() {
     })
 
     // /* get the only loged user orders */
-    app.get('/orders', verifyJWT, async(req, res)=>{
+    app.get('/orders', verifyJWT, async (req, res) => {
       const userEmail = req.query.userEmail;
       const authorization = req.headers.authorization;
       const decodedEmail = req.decoded.email;
-      if(userEmail === decodedEmail){
+      if (userEmail === decodedEmail) {
         // console.log('auth header', authorization);
         const query = { userEmail: userEmail };
         const bookings = await purchaseCollection.find(query).toArray();
         return res.send(bookings)
       }
-      else{
-        return res.status(403).send({message: 'Forbidden Access'});
+      else {
+        return res.status(403).send({ message: 'Forbidden Access' });
       }
     })
 
-     /* get single purchase by id */
+    /* get single purchase by id */
     app.get('/purchase/:id', async (req, res) => {
       const id = req.params.id;
       console.log(id, 'spbi')
@@ -97,30 +113,30 @@ async function run() {
 
 
 
-/* delet orders when user not paid */
-app.delete('/orders/:id',async(req,res)=>{
-  const id = req.params.id;
-  // console.log(id , 'purcheses using id')
-  const filter = { _id: ObjectId(id) };
-  const result = await purchaseCollection.deleteOne(filter);
-  res.send(result);
-})
+    /* delet orders when user not paid */
+    app.delete('/orders/:id', async (req, res) => {
+      const id = req.params.id;
+      // console.log(id , 'purcheses using id')
+      const filter = { _id: ObjectId(id) };
+      const result = await purchaseCollection.deleteOne(filter);
+      res.send(result);
+    })
 
-// /* Delet a Users Products */
-// app.delete('/order/:id',async(req,res)=>{
-//   const id = req.params.id;
-//   console.log(id);
-//   const filter = { _id: ObjectId(id) };
-//   const result = await purchaseCollection.deleteOne(filter);
-//   res.send(result);
-// })
+    // /* Delet a Users Products */
+    // app.delete('/order/:id',async(req,res)=>{
+    //   const id = req.params.id;
+    //   console.log(id);
+    //   const filter = { _id: ObjectId(id) };
+    //   const result = await purchaseCollection.deleteOne(filter);
+    //   res.send(result);
+    // })
 
-// app.get('/part/:id', async (req, res) => {
-//   const id = req.params.id;
-//   const query = { _id: ObjectId(id) };
-//   const booking = await partsCollection.findOne(query);
-//   res.send(booking);
-// })
+    // app.get('/part/:id', async (req, res) => {
+    //   const id = req.params.id;
+    //   const query = { _id: ObjectId(id) };
+    //   const booking = await partsCollection.findOne(query);
+    //   res.send(booking);
+    // })
 
 
 
