@@ -42,6 +42,7 @@ async function run() {
     const purchaseCollection = client.db("manufactureable_parts").collection('purchases');
     const paymentCollection = client.db("manufactureable_parts").collection('payments');
     const reviewCollection = client.db("manufactureable_parts").collection('reviews');
+    const profileCollection = client.db("manufactureable_parts").collection('profile');
 
 
     /* Stripe Payment Intent */
@@ -88,6 +89,15 @@ async function run() {
       res.send(review);
     })
 
+
+
+    /* create user profil */
+    app.post('/createProfile', async (req, res) => {
+      const data = req.body;
+      const result = await profileCollection.insertOne(data);
+      res.send(result);
+      console.log(result)
+    })
 
     /* get the user is =! admin */
     app.get('/admin/:email', async (req, res) => {
