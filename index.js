@@ -11,6 +11,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 app.use(cors());
 app.use(express.json());
 
+
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.uhmti.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -40,6 +41,26 @@ async function run() {
     const userCollection = client.db("manufactureable_parts").collection('allUsers');
     const purchaseCollection = client.db("manufactureable_parts").collection('purchases');
 
+
+    /* Stripe Payment Intent */
+    app.post('create-payment-intent', verifyJWT, async(req,res)=>{
+      const service = req.body;
+      const price = service.price;
+      const amount = price*100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount : amount,
+        currency: 'usd',
+        payment_method_types:['card']
+      });
+      res.send({clientSecret: paymentIntent.client_secret})
+    })
+
+
+
+
+
+
+
     /* get the user is =! admin */
     app.get('/admin/:email', async (req, res) => {
       const email = req.params.email;
@@ -64,13 +85,22 @@ async function run() {
       }
     })
 
+     /* get single purchase by id */
+    app.get('/purchase/:id', async (req, res) => {
+      const id = req.params.id;
+      console.log(id, 'spbi')
+      const query = { _id: ObjectId(id) };
+      const Result = await purchaseCollection.findOne(query);
+      res.send(Result);
+    })
+
 
 
 
 /* delet orders when user not paid */
 app.delete('/orders/:id',async(req,res)=>{
   const id = req.params.id;
-  console.log(id)
+  // console.log(id , 'purcheses using id')
   const filter = { _id: ObjectId(id) };
   const result = await purchaseCollection.deleteOne(filter);
   res.send(result);
