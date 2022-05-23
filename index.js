@@ -73,7 +73,13 @@ async function run() {
       
     })
 
-
+    /* Add a Review */
+    app.post('/addReview', async (req, res)=>{
+      const data = req.body;
+      const result = await doctorCollection.insertOne(data);
+      res.send(result);
+      console.log(result)
+    })
 
 
 
