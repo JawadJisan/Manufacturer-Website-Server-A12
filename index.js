@@ -15,23 +15,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.uhmti.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-/* Verify JWT */
-// function verifyJWT(req, res, next) {
-//     const authHeaders = req.headers.authorization;
-//     if(!authHeaders){
-//         return res.status(401).send({message: 'UnAuthorized Access' })
-//     }
-//     const token = authHeaders.split(' ')[1];
-//     jwt.verify(token, process.env.ACCESS_TOKEN_KEY, function(err, decoded){
-//         if(err){
-//             return res.status(403).send({message:'Forbidden Access'})
-//         }
-//         decoded = req.decoded;
-//         console.log(decoded, 'from jwt');
-//         next();
 
-//     })
-// }
 function verifyJWT(req, res, next) {
   const authHeaders = req.headers.authorization;
   if (!authHeaders) {
@@ -65,8 +49,6 @@ async function run() {
     })
 
     // /* get the only loged user orders */
-  
-
     app.get('/orders', verifyJWT, async(req, res)=>{
       const userEmail = req.query.userEmail;
       const authorization = req.headers.authorization;
@@ -85,7 +67,20 @@ async function run() {
 
 
 
+/* delet orders when user not paid */
+app.delete('/orders/:id',async(req,res)=>{
+  const id = req.params.id;
+  const filter = { _id: ObjectId(id) };
+  const result = await purchaseCollection.deleteOne(filter);
+  res.send(result);
+})
 
+// app.get('/part/:id', async (req, res) => {
+//   const id = req.params.id;
+//   const query = { _id: ObjectId(id) };
+//   const booking = await partsCollection.findOne(query);
+//   res.send(booking);
+// })
 
 
 
