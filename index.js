@@ -41,26 +41,27 @@ async function run() {
     const userCollection = client.db("manufactureable_parts").collection('allUsers');
     const purchaseCollection = client.db("manufactureable_parts").collection('purchases');
     const paymentCollection = client.db("manufactureable_parts").collection('payments');
+    const reviewCollection = client.db("manufactureable_parts").collection('reviews');
 
 
     /* Stripe Payment Intent */
-    app.post('/create-payment-intent', verifyJWT, async(req, res) =>{
+    app.post('/create-payment-intent', verifyJWT, async (req, res) => {
       const service = req.body;
       const price = service.price;
-      const amount = price*100;
+      const amount = price * 100;
       const paymentIntent = await stripe.paymentIntents.create({
-        amount : amount,
+        amount: amount,
         currency: 'usd',
-        payment_method_types:['card']
+        payment_method_types: ['card']
       });
-      res.send({clientSecret: paymentIntent.client_secret})
+      res.send({ clientSecret: paymentIntent.client_secret })
     });
 
     /*  */
-    app.patch('/purchase/:id', async(req,res)=>{
+    app.patch('/purchase/:id', async (req, res) => {
       const id = req.params.id;
       const payment = req.body;
-      const filter = {_id: ObjectId(id)};
+      const filter = { _id: ObjectId(id) };
       const updateDoc = {
         $set: {
           paid: true,
@@ -69,19 +70,23 @@ async function run() {
       }
       const updateBooking = await purchaseCollection.updateOne(filter, updateDoc);
       const result = await paymentCollection.insertOne(payment);
-      res.status(401).send({updateBooking, result})
-      
+      res.status(401).send({ updateBooking, result })
+
     })
 
     /* Add a Review */
-    app.post('/addReview', async (req, res)=>{
+    app.post('/addReview', async (req, res) => {
       const data = req.body;
-      const result = await doctorCollection.insertOne(data);
+      const result = await reviewCollection.insertOne(data);
       res.send(result);
       console.log(result)
     })
 
-
+    /* get all reviews */
+    app.get('/reviews', async (req, res) => {
+      const review = await reviewCollection.find().toArray();
+      res.send(review);
+    })
 
 
     /* get the user is =! admin */
