@@ -22,7 +22,7 @@ function verifyJWT(req, res, next) {
     return res.status(401).send({ message: 'UnAuthorized Access' })
   }
   const token = authHeaders.split(' ')[1];
-  console.log(token, 'token verify jwt')
+  // console.log(token, 'token verify jwt')
   jwt.verify(token, process.env.ACCESS_TOKEN_KEY, function (err, decoded) {
     if (err) {
       return res.status(403).send({ message: 'Forbidden accessSS' })
@@ -54,7 +54,7 @@ async function run() {
       const authorization = req.headers.authorization;
       const decodedEmail = req.decoded.email;
       if(userEmail === decodedEmail){
-        console.log('auth header', authorization);
+        // console.log('auth header', authorization);
         const query = { userEmail: userEmail };
         const bookings = await purchaseCollection.find(query).toArray();
         return res.send(bookings)
@@ -70,10 +70,20 @@ async function run() {
 /* delet orders when user not paid */
 app.delete('/orders/:id',async(req,res)=>{
   const id = req.params.id;
+  console.log(id)
   const filter = { _id: ObjectId(id) };
   const result = await purchaseCollection.deleteOne(filter);
   res.send(result);
 })
+
+// /* Delet a Users Products */
+// app.delete('/order/:id',async(req,res)=>{
+//   const id = req.params.id;
+//   console.log(id);
+//   const filter = { _id: ObjectId(id) };
+//   const result = await purchaseCollection.deleteOne(filter);
+//   res.send(result);
+// })
 
 // app.get('/part/:id', async (req, res) => {
 //   const id = req.params.id;
@@ -100,7 +110,7 @@ app.delete('/orders/:id',async(req,res)=>{
       };
       const result = await userCollection.updateOne(filter, updateDoc, option);
       const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_KEY, { expiresIn: '2h' })
-      console.log(token, 'when user login');
+      // console.log(token, 'when user login');
       res.status(200).send({ token, result });
 
 
