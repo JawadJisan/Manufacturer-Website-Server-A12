@@ -89,6 +89,12 @@ async function run() {
       res.send(review);
     })
 
+    /* get all orders */
+    /* get all parts */
+    app.get('/allPurchases', async (req, res) => {
+      const parts = await purchaseCollection.find().toArray();
+      res.send(parts);
+    })
 
     /* verify admin */
     const verifyAdmin = async (req, res, next) => {
@@ -182,6 +188,7 @@ async function run() {
       const result = await purchaseCollection.deleteOne(filter);
       res.send(result);
     })
+  
 
 
     /* make admin */
@@ -200,6 +207,26 @@ async function run() {
       else{
         res.status(403).send({message:'Forbidden Access'})
       }
+    })
+
+    /* Admin Make Status Pending to Shipment */
+    app.put('/changeStatus/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      // const email = req.params.email;
+      // const requester = req.decoded.email;
+      // const requesterAccount = await userCollection.findOne({email: requester});
+      // if(requesterAccount.role === 'admin'){}
+        // const filter = { email: email };
+        const updateDoc = {
+          $set: { status: 'shipped' },
+        };
+        const result = await purchaseCollection.updateOne(filter, updateDoc);
+        res.send(result);
+      // }
+      // else{
+      //   res.status(403).send({message:'Forbidden Access'})
+      // }
     })
 
 
@@ -254,8 +281,7 @@ async function run() {
     })
     /* get single parts by id */
     app.get('/part/:id', async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: ObjectId(id) };
+      
       const booking = await partsCollection.findOne(query);
       res.send(booking);
     })
