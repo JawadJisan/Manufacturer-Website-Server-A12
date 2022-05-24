@@ -91,12 +91,34 @@ async function run() {
 
 
 
-    /* create user profil */
-    app.post('/createProfile', async (req, res) => {
-      const data = req.body;
-      const result = await profileCollection.insertOne(data);
-      res.send(result);
-      console.log(result)
+    // /* create user profil */
+    // app.post('/createProfile', async (req, res) => {
+    //   const data = req.body;
+    //   const result = await profileCollection.insertOne(data);
+    //   res.send(result);
+    //   console.log(result)
+    // })
+
+    app.put('/createProfile/:email', async (req, res)=>{
+      const email = req.params.email;
+      console.log(email)
+      const user = req.body;
+      const filter = {email: email};
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user
+      };
+      const result =await profileCollection.updateOne(filter, updateDoc, options);
+      res.status(200).send( result)
+      console.log(result);
+    })
+
+    app.get('/userProfile/:email', async (req, res) => {
+      const email = req.params.email;
+      console.log(email, 'user profile')
+      const query = {email};
+      const Result = await profileCollection.findOne(query);
+      res.send(Result);
     })
 
     /* get the user is =! admin */
