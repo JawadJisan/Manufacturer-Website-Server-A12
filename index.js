@@ -90,6 +90,17 @@ async function run() {
     })
 
 
+    /* verify admin */
+    const verifyAdmin = async (req, res, next) => {
+      const requester = req.decoded.email;
+      const requesterAccount = await userCollection.findOne({ email: requester });
+      if (requesterAccount.role === 'admin') {
+        next();
+      }
+      else {
+        return res.status(403).send({ message: 'Forbidden access' })
+      }
+    }
 
     // /* create user profil */
     // app.post('/createProfile', async (req, res) => {
@@ -99,24 +110,24 @@ async function run() {
     //   console.log(result)
     // })
 
-    app.put('/createProfile/:email', async (req, res)=>{
+    app.put('/createProfile/:email', async (req, res) => {
       const email = req.params.email;
       console.log(email)
       const user = req.body;
-      const filter = {email: email};
+      const filter = { email: email };
       const options = { upsert: true };
       const updateDoc = {
         $set: user
       };
-      const result =await profileCollection.updateOne(filter, updateDoc, options);
-      res.status(200).send( result)
+      const result = await profileCollection.updateOne(filter, updateDoc, options);
+      res.status(200).send(result)
       console.log(result);
     })
 
     app.get('/userProfile/:email', async (req, res) => {
       const email = req.params.email;
       console.log(email, 'user profile')
-      const query = {email};
+      const query = { email };
       const Result = await profileCollection.findOne(query);
       res.send(Result);
     })
@@ -127,6 +138,12 @@ async function run() {
       const user = await userCollection.findOne({ email: email });
       const isAdmin = user.role === 'admin';
       res.send({ admin: isAdmin })
+    })
+
+    /* get all users */
+    app.get('/users', verifyJWT, async (req, res) => {
+      const users = await userCollection.find().toArray();
+      res.send(users);
     })
 
     // /* get the only loged user orders */
@@ -183,7 +200,23 @@ async function run() {
     // })
 
 
-
+    /* make admin */
+    app.put('/users/admin/:email', verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      const requester = req.decoded.email;
+      const requesterAccount = await userCollection.findOne({email: requester});
+      if(requesterAccount.role === 'admin'){
+        const filter = { email: email };
+        const updateDoc = {
+          $set: { role: 'admin' },
+        };
+        const result = await userCollection.updateOne(filter, updateDoc);
+        res.send(result);
+      }
+      else{
+        res.status(403).send({message:'Forbidden Access'})
+      }
+    })
 
 
 
