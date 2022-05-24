@@ -183,22 +183,6 @@ async function run() {
       res.send(result);
     })
 
-    // /* Delet a Users Products */
-    // app.delete('/order/:id',async(req,res)=>{
-    //   const id = req.params.id;
-    //   console.log(id);
-    //   const filter = { _id: ObjectId(id) };
-    //   const result = await purchaseCollection.deleteOne(filter);
-    //   res.send(result);
-    // })
-
-    // app.get('/part/:id', async (req, res) => {
-    //   const id = req.params.id;
-    //   const query = { _id: ObjectId(id) };
-    //   const booking = await partsCollection.findOne(query);
-    //   res.send(booking);
-    // })
-
 
     /* make admin */
     app.put('/users/admin/:email', verifyJWT, async (req, res) => {
@@ -219,6 +203,23 @@ async function run() {
     })
 
 
+
+    /* update the quantity of aroducrts*/
+    // app.patch('/part/:id', async(req,res)=>{
+    //   const id = req.params.id;
+    //   const quantity = req.body;
+    //   const filter = {_id: ObjectId(id)};
+    //   const updateDoc = {
+    //     $set: {
+    //       // paid: true,
+    //       availableQuantity: quantity,
+    //     }
+    //   }
+    //   const updateBooking = await partsCollection.updateOne(filter, updateDoc);
+    //   console.log(updateBooking, 'from all parts update')
+    //   res.send(updateBooking)
+      
+    // })
 
 
 
