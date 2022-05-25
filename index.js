@@ -188,6 +188,16 @@ async function run() {
       const result = await purchaseCollection.deleteOne(filter);
       res.send(result);
     })
+
+    /* delet tools by admin */
+    app.delete('/tools/:id', async (req, res) => {
+      const id = req.params.id;
+      console.log(id , 'Admin is Deleting Parts')
+      const filter = { _id: ObjectId(id) };
+      const result = await partsCollection.deleteOne(filter);
+      console.log(result, 'admin delet')
+      res.send(result);
+    })
   
 
 
