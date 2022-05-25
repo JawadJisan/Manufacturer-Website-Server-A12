@@ -280,9 +280,10 @@ async function run() {
       res.send(parts);
     })
     /* get single parts by id */
-    app.get('/part/:id', async (req, res) => {
-      
-      const booking = await partsCollection.findOne(query);
+    app.get('/part/:id', async(req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const booking = await partsCollection.findOne(filter);
       res.send(booking);
     })
 
