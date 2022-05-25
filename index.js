@@ -171,7 +171,7 @@ async function run() {
     /* get single purchase by id */
     app.get('/purchase/:id', async (req, res) => {
       const id = req.params.id;
-      console.log(id, 'spbi')
+      // console.log(id, 'spbi')
       const query = { _id: ObjectId(id) };
       const Result = await purchaseCollection.findOne(query);
       res.send(Result);
