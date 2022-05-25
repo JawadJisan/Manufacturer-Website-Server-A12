@@ -190,12 +190,21 @@ async function run() {
     })
 
     /* delet tools by admin */
-    app.delete('/tools/:id', async (req, res) => {
+    app.delete('/tools/:id', verifyJWT, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       console.log(id , 'Admin is Deleting Parts')
       const filter = { _id: ObjectId(id) };
       const result = await partsCollection.deleteOne(filter);
       console.log(result, 'admin delet')
+      res.send(result);
+    })
+    /* delet user by admin */
+    app.delete('/user/:id', verifyJWT, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      console.log(id , 'User is Deleting ')
+      const filter = { _id: ObjectId(id) };
+      const result = await userCollection.deleteOne(filter);
+      console.log(result, 'admin delet a user')
       res.send(result);
     })
   
