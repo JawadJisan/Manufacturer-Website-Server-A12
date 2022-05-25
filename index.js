@@ -212,12 +212,23 @@ async function run() {
     /* Admin Make Status Pending to Shipment */
     app.put('/changeStatus/:id', async (req, res) => {
       const id = req.params.id;
+      const purchase = req.body;
+      const availableQuantity = purchase.availableQuantity;
+      console.log(id, availableQuantity, 'change quantity')
+
       const filter = { _id: ObjectId(id) };
-      // const email = req.params.email;
-      // const requester = req.decoded.email;
-      // const requesterAccount = await userCollection.findOne({email: requester});
-      // if(requesterAccount.role === 'admin'){}
-        // const filter = { email: email };
+        const updateDoc = {
+          $set: { availableQuantity: availableQuantity },
+        };
+        const result = await partsCollection.updateOne(filter, updateDoc);
+        res.send(result);
+        console.log(result);
+    })
+
+    /* Make Quantity Reduce when user order */
+    app.put('/changeQty/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
         const updateDoc = {
           $set: { status: 'shipped' },
         };
