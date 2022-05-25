@@ -208,10 +208,12 @@ async function run() {
         res.status(403).send({message:'Forbidden Access'})
       }
     })
-
-    /* Admin Make Status Pending to Shipment */
-    app.put('/changeStatus/:id', async (req, res) => {
+    
+    /* Make Quantity Reduce when user order */
+    app.put('/changeQty/:id', async (req, res) => {
       const id = req.params.id;
+      const body = req.body;
+      console.log(body, 'change qty')
       const purchase = req.body;
       const availableQuantity = purchase.availableQuantity;
       console.log(id, availableQuantity, 'change quantity')
@@ -223,10 +225,10 @@ async function run() {
         const result = await partsCollection.updateOne(filter, updateDoc);
         res.send(result);
         console.log(result);
-    })
-
-    /* Make Quantity Reduce when user order */
-    app.put('/changeQty/:id', async (req, res) => {
+      })
+      
+      /* Admin Make Status Pending to Shipment */
+    app.put('/changeStatus/:id', async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
         const updateDoc = {
@@ -234,6 +236,7 @@ async function run() {
         };
         const result = await purchaseCollection.updateOne(filter, updateDoc);
         res.send(result);
+        console.log(result, 'shipped')
       // }
       // else{
       //   res.status(403).send({message:'Forbidden Access'})
