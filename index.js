@@ -12,6 +12,48 @@ app.use(cors());
 app.use(express.json());
 
 
+const nodemailer = require('nodemailer');
+const sgTransport = require('nodemailer-sendgrid-transport');
+
+var emailSenderoption = {
+  auth: {
+    api_key: process.env.EMAIL_SENDER_KEY
+  }
+}
+const emailClient = nodemailer.createTransport(sgTransport(emailSenderoption));
+
+function sendToolsPurchaseEmail(purchase) {
+  const {name, userEmail, userName, address, phone, price  } = purchase;
+
+  var email = {
+    from: process.env.EMAIL_SENDER ,
+    to: userEmail,
+    subject: `Your Tools ${name} booked is Confirm`,
+    text: `Your have successfull add to Your Cart  for ${name} from this email ${userEmail}`,
+    html: `
+      <div>
+      <h1>Hellw ${userName} </h1>
+      <p>Your Booked for ${name} is confirm</p>
+      <p>Please Go To Dashboard and pay ${price} </p>
+      <p>After Yoy pay We Will Deliver Your Tools in This Address: ${address} </p>
+      <br/>
+      <h3> Our Address</h3>
+      <p>USA</p>
+      </div>
+    `
+  };
+
+  emailClient.sendMail(email, function(err, info){
+    if (err ){
+      console.log(err);
+    }
+    else {
+      console.log('Message sent: ' , info);
+    }
+});
+}
+
+
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.uhmti.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -147,7 +189,7 @@ async function run() {
     })
 
     /* get all users */
-    app.get('/users', verifyJWT, async (req, res) => {
+    app.get('/users', verifyJWT, verifyAdmin, async (req, res) => {
       const users = await userCollection.find().toArray();
       res.send(users);
     })
@@ -195,7 +237,7 @@ async function run() {
       console.log(id , 'Admin is Deleting Parts')
       const filter = { _id: ObjectId(id) };
       const result = await partsCollection.deleteOne(filter);
-      console.log(result, 'admin delet')
+      console.log(result, 'admin DElet a Tools')
       res.send(result);
     })
     /* delet user by admin */
@@ -327,6 +369,7 @@ async function run() {
       //   const exist = await booking
       const result = await purchaseCollection.insertOne(purchase);
       console.log(result)
+      sendToolsPurchaseEmail(purchase)
       return res.send({ success: true, result });
     })
 
