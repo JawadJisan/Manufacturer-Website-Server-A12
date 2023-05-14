@@ -25,6 +25,8 @@ const emailClient = nodemailer.createTransport(sgTransport(emailSenderoption));
 function sendToolsPurchaseEmail(purchase) {
   const {name, userEmail, userName, address, phone, price  } = purchase;
 
+
+  /*  */
   var email = {
     from: process.env.EMAIL_SENDER ,
     to: userEmail,
